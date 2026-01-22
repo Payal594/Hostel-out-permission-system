@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Management System</title>
+    <style>
+        /* 1. Base Reset & Fonts */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden; 
+        }
+
+        /* 2. Hero Section */
+        .hero-container {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .welcome-text {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: -webkit-linear-gradient(#fff, #c3cfe2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* 3. Role Selection Grid */
+        .card-grid {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 20px;
+            animation: fadeInUp 1s ease-out 0.3s backwards; 
+        }
+
+        /* 4. Role Cards */
+        .role-card {
+            background: rgba(255, 255, 255, 0.1); /* Glass effect */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 280px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-15px);
+            background: white;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Change text color on hover */
+        .role-card:hover h3, 
+        .role-card:hover p,
+        .role-card:hover .icon {
+            color: #333; 
+        }
+
+        /* 5. Card Content */
+        .icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            display: block;
+            transition: transform 0.3s;
+        }
+        
+        .role-card:hover .icon {
+            transform: scale(1.1);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 25px;
+        }
+
+        /* 6. Specific Accents on Hover */
+        /* Student: Blue/Purple */
+        .student-card:hover h3 { color: #667eea; }
+        .student-card:hover .arrow { background: #667eea; }
+
+        /* Warden: Green */
+        .warden-card:hover h3 { color: #11998e; }
+        .warden-card:hover .arrow { background: #11998e; }
+
+        /* Teacher: Orange */
+        .teacher-card:hover h3 { color: #ff9966; }
+        .teacher-card:hover .arrow { background: #ff9966; }
+
+        /* 7. Action Arrow Button */
+        .arrow {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        /* 8. Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-container">
+        <div class="welcome-text">Welcome to</div>
+        <h1>BV Raju Institute Hostel Portal</h1>
+        <p class="subtitle">Streamlined management for permissions, requests, and approvals. Please select your role to continue.</p>
+    </div>
+
+    <div class="card-grid">
+        
+        <a href="login.html?role=student" class="role-card student-card">
+            <span class="icon">👨‍🎓</span>
+            <h3>Student</h3>
+            <p class="card-desc">Apply for out-passes, manage permissions, and view history.</p>
+            <div class="arrow">➝</div>
+        </a>
+
+        <a href="login.html?role=warden" class="role-card warden-card">
+            <span class="icon">👮‍♂️</span>
+            <h3>Warden</h3>
+            <p class="card-desc">Approve requests, manage hostel blocks, and track students.</p>
+            <div class="arrow">➝</div>
+        </a>
+
+        <a href="login.html?role=teacher" class="role-card teacher-card">
+            <span class="icon">👨‍🏫</span>
+            <h3>Class Teacher</h3>
+            <p class="card-desc">Grant permissions for students during college working hours.</p>
+            <div class="arrow">➝</div>
+        </a>
+
+    </div>
+
+    </body>
+</html>
