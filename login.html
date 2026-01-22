@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* 1. Base Styles (Identical for everyone) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Default background (will be replaced by JS) */
+            background: #f4f7f6;
+            transition: background 0.5s ease;
+        }
+
+        /* 2. The Login Card (Same CSS as Warden Dashboard) */
+        .login-card {
+            background: white;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* 3. Typography */
+        h2 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* 4. Form Inputs */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        /* Input Focus Effect */
+        input:focus {
+            border-color: #555; /* JS will change this color */
+            box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+        }
+
+        /* 5. The Button */
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            background: #333; /* Default fallback */
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* 6. Footer Links */
+        .footer-links {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: #777;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #333;
+            text-decoration: underline;
+        }
+
+        .forgot-pass {
+            color: #d9534f !important;
+            font-weight: bold;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2 id="roleTitle">Login</h2>
+        <p>Please enter your credentials</p>
+
+        <form action="login_process.php" method="POST">
+            <input type="hidden" name="role" id="roleInput">
+            
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" id="emailInput" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" id="passInput" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" id="loginBtn">Sign In</button>
+
+            <div class="footer-links">
+                <a href="#" id="signupLink">Create New Account</a>
+                <a href="forgot_password.html" class="forgot-pass">Forgot Password?</a>
+                <a href="index.html">← Back to Home</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // 1. Check who is visiting (e.g., login.html?role=warden)
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role') || 'student'; // Default to student
+
+        // 2. Get Elements
+        const body = document.body;
+        const title = document.getElementById('roleTitle');
+        const btn = document.getElementById('loginBtn');
+        const signupLink = document.getElementById('signupLink');
+        const roleInput = document.getElementById('roleInput');
+        const inputs = document.querySelectorAll('input');
+
+        // 3. Set hidden input for PHP
+        roleInput.value = role;
+
+        // 4. Apply The "Warden-Style" Layout but with Specific Colors
+        if (role === 'student') {
+            // STUDENT: Blue/Purple Gradient
+            body.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            btn.style.background = "linear-gradient(to right, #667eea, #764ba2)";
+            title.innerText = "Student Login";
+            title.style.color = "#667eea";
+            signupLink.href = "SIGNUP_Student.html";
+            
+            // Set input border color on click
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#667eea'));
+
+        } else if (role === 'warden') {
+            // WARDEN: Green/Teal Gradient
+            body.style.background = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)";
+            btn.style.background = "linear-gradient(to right, #11998e, #38ef7d)";
+            title.innerText = "Warden Login";
+            title.style.color = "#11998e";
+            signupLink.href = "SIGNUP_Warden.html";
+
+            // Set input border color on click
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#11998e'));
+
+        } else if (role === 'teacher') {
+            // TEACHER: Orange/Red Gradient
+            body.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
+            btn.style.background = "linear-gradient(to right, #ff9966, #ff5e62)";
+            title.innerText = "Teacher Login";
+            title.style.color = "#ff9966";
+            
+            // Teachers usually don't sign up themselves
+            signupLink.style.display = "none"; 
+
+            // Set input border color on click
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#ff9966'));
+        }
+
+        // Reset border on blur (click away)
+        inputs.forEach(i => i.addEventListener('blur', () => i.style.borderColor = '#e1e1e1'));
+
+    </script>
+
+</body>
+</html>
