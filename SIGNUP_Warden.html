@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Warden Registration</title>
+    <style>
+        body { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); display: flex; justify-content: center; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 450px; }
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .radio-group { margin: 15px 0; font-weight: bold; color: #555; }
+        .radio-group input { margin-left: 10px; margin-right: 5px; }
+        button { width: 100%; padding: 12px; background: #11998e; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align:center;">Warden Register</h2>
+        <form id="wardenForm" action="save_warden.php" method="POST">
+            <input type="text" name="fullname" placeholder="Full Name" required>
+            <input type="number" id="phone" name="phone" placeholder="Phone Number" required>
+            <input type="email" name="email" placeholder="Email" required>
+            
+            <div class="radio-group">
+                <label>I manage: </label>
+                <input type="radio" name="gender" value="Male" required> Boys Hostel
+                <input type="radio" name="gender" value="Female" required> Girls Hostel
+            </div>
+
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+
+            <button type="submit">Register</button>
+            <p style="text-align:center"><a href="login.html?role=warden">Back to Login</a></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('wardenForm').addEventListener('submit', function(e) {
+            var phone = document.getElementById('phone').value;
+            var pass = document.getElementById('password').value;
+            var confirmPass = document.getElementById('confirm_password').value;
+
+            // --- NEW: Strict Phone Validation ---
+            var phonePattern = /^\d{10}$/;
+            if (!phonePattern.test(phone)) {
+                alert("Phone Number must be EXACTLY 10 digits and cannot be negative!");
+                e.preventDefault(); return;
+            }
+            // ------------------------------------
+
+            if (pass !== confirmPass) {
+                alert("Passwords do not match!");
+                e.preventDefault(); return;
+            }
+
+            if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
+                alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
+                e.preventDefault(); return;
+            }
+        });
+    </script>
+</body>
+</html>
