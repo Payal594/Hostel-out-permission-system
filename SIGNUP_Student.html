@@ -16,9 +16,9 @@
     <div class="container">
         <h2 style="text-align:center">Student Registration</h2>
         <form id="regForm" action="save_student.php" method="POST">
-            <input type="text" name="fullname" placeholder="Full Name" required>
+            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
             <input type="number" id="phone" name="phone" placeholder="Phone Number" required>
-            <input type="email" name="email" placeholder="Email" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
             
             <div class="radio-group">
                 <label>Gender: </label>
@@ -40,8 +40,8 @@
                 <option value="">Select Gender First</option>
             </select>
 
-            <input type="text" name="room_number" placeholder="Room Number (e.g. 101)" required>
-            <input type="text" name="parentName" placeholder="Parent Name" required>
+            <input type="text" id="room_number" name="room_number" placeholder="Room Number (e.g. 101)" required>
+            <input type="text" id="parentName" name="parentName" placeholder="Parent Name" required>
             <input type="number" id="parentPhone" name="parentPhone" placeholder="Parent Phone" required>
 
             <button type="submit">Register</button>
@@ -74,15 +74,17 @@
             var pPhone = document.getElementById('parentPhone').value;
             var pass = document.getElementById('password').value;
             var confirmPass = document.getElementById('confirm_password').value;
-            var sName = document.getElementByName('fullname').value;
-            var pName = document.getElementByName('parentName').value;
-            var emailInput = document.getElementByName('email').value;
+            var sName = document.getElementById('fullname').value;
+            var pName = document.getElementById('parentName').value;
+            var emailInput = document.getElementById('email').value;
+            var roomNum = document.getElementById('room_number').value;
 
             // --- NEW: Strict Phone Validation ---
             // Regex /^\d{10}$/ means: Start -> Digit -> Exactly 10 times -> End.
             // It rejects negatives (which have a '-') and decimals.
             var phonePattern = /^\d{10}$/;
             const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
+            var roomPattern = /^\d{3}$/;
 
             if (!phonePattern.test(sPhone)) {
                 alert("Student Phone Number must be EXACTLY 10 digits and cannot be negative!");
@@ -128,10 +130,17 @@
     alert("Invalid format. Please use your BVRIT email.");
                 e.preventDefault();return;
 }
+
+            if (!roomPattern.test(roomNum)) {
+    alert("Room Number must be exactly 3 Digits (0-9) and cannot contain symbols.");
+    e.preventDefault(); 
+    return;
+}
             
         });
     </script>
 </body>
 
 </html>
+
 
