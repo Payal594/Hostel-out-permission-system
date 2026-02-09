@@ -109,12 +109,14 @@
                 alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
                 e.preventDefault(); return;
             }
-
+            
+            sName = sName.trim();
             if (sName === '') {
                 alert("The Student name cannot be blank !");
                 e.preventDefault();return;
             }
-            
+
+            pName = pName.trim();
             if (pName === '') {
                 alert("The Parent Name cannot be blank!");
                 e.preventDefault();return;
@@ -132,3 +134,4 @@
 </body>
 
 </html>
+
