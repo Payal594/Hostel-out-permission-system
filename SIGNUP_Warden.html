@@ -16,9 +16,9 @@
     <div class="container">
         <h2 style="text-align:center;">Warden Register</h2>
         <form id="wardenForm" action="save_warden.php" method="POST">
-            <input type="text" name="fullname" placeholder="Full Name" required>
+            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
             <input type="number" id="phone" name="phone" placeholder="Phone Number" required>
-            <input type="email" name="email" placeholder="Email" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
             
             <div class="radio-group">
                 <label>I manage: </label>
@@ -39,6 +39,9 @@
             var phone = document.getElementById('phone').value;
             var pass = document.getElementById('password').value;
             var confirmPass = document.getElementById('confirm_password').value;
+            var wName = document.getElementById('fullname').value;
+            var email = document.getElementById('email').value;
+            const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
 
             // --- NEW: Strict Phone Validation ---
             var phonePattern = /^\d{10}$/;
@@ -57,7 +60,24 @@
                 alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
                 e.preventDefault(); return;
             }
+
+            wName = wName.trim();
+            if (wName === '') {
+                alert("The Student name cannot be blank !");
+                e.preventDefault();return;
+            }
+
+                        if (emailRegex.test(email)) {
+    return;
+} else {
+    alert("Invalid format. Please use your BVRIT email.");
+                e.preventDefault();return;
+}
+
+
+            
         });
     </script>
 </body>
+
 </html>
