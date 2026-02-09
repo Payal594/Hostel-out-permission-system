@@ -85,6 +85,7 @@
             var phonePattern = /^\d{10}$/;
             const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
             var roomPattern = /^\d{3}$/;
+            var namePattern = /^[a-zA-Z\s]+$/;
 
             if (!phonePattern.test(sPhone)) {
                 alert("Student Phone Number must be EXACTLY 10 digits and cannot be negative!");
@@ -136,12 +137,18 @@
     e.preventDefault(); 
     return;
 }
+            if (!namePattern.test(sName) && !namePattern.test(pName)) {
+    alert("Student Name can only contain letters and spaces.");
+    e.preventDefault(); 
+    return;
+            }
             
         });
     </script>
 </body>
 
 </html>
+
 
 
 
