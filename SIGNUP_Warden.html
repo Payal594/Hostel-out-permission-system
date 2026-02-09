@@ -42,6 +42,7 @@
             var wName = document.getElementById('fullname').value;
             var email = document.getElementById('email').value;
             const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
+            var namePattern = /^[a-zA-Z\s]+$/;
 
             // --- NEW: Strict Phone Validation ---
             var phonePattern = /^\d{10}$/;
@@ -74,10 +75,15 @@
                 e.preventDefault();return;
 }
 
-
+if (!namePattern.test(wName)) {
+    alert("Student Name can only contain letters and spaces.");
+    e.preventDefault(); 
+    return;
+            }
             
         });
     </script>
 </body>
 
 </html>
+
