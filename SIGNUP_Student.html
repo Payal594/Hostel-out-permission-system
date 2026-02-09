@@ -74,11 +74,15 @@
             var pPhone = document.getElementById('parentPhone').value;
             var pass = document.getElementById('password').value;
             var confirmPass = document.getElementById('confirm_password').value;
+            var sName = document.getElementByName('fullname').value;
+            var pName = document.getElementByName('parentName').value;
+            var emailInput = document.getElementByName('email').value;
 
             // --- NEW: Strict Phone Validation ---
             // Regex /^\d{10}$/ means: Start -> Digit -> Exactly 10 times -> End.
             // It rejects negatives (which have a '-') and decimals.
             var phonePattern = /^\d{10}$/;
+            const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
 
             if (!phonePattern.test(sPhone)) {
                 alert("Student Phone Number must be EXACTLY 10 digits and cannot be negative!");
@@ -105,7 +109,26 @@
                 alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
                 e.preventDefault(); return;
             }
+
+            if (sName === '') {
+                alert("The Student name cannot be blank !");
+                e.preventDefault();return;
+            }
+            
+            if (pName === '') {
+                alert("The Parent Name cannot be blank!");
+                e.preventDefault();return;
+            }
+
+            if (emailRegex.test(emailInput)) {
+    alert("Valid BVRIT student email!");
+} else {
+    alert("Invalid format. Please use your BVRIT email.");
+                e.preventDefault();return;
+}
+            
         });
     </script>
 </body>
+
 </html>
