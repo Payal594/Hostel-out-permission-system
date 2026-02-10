@@ -137,9 +137,7 @@
     return;
             }
 
-             if (emailRegex.test(emailInput)) {
-    return;
-} else {
+             if (!emailRegex.test(emailInput)) {
     alert("Invalid format. Please use your BVRIT email.");
                 e.preventDefault();return;
 }
@@ -149,6 +147,7 @@
 </body>
 
 </html>
+
 
 
 
