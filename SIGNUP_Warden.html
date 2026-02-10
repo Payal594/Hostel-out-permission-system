@@ -74,9 +74,7 @@ if (!namePattern.test(wName)) {
     return;
             }
 
-            if (emailRegex.test(email)) {
-    return;
-} else {
+            if (!emailRegex.test(email)) {
     alert("Invalid format. Please use your BVRIT email.");
                 e.preventDefault();return;
 }
@@ -86,6 +84,7 @@ if (!namePattern.test(wName)) {
 </body>
 
 </html>
+
 
 
 
