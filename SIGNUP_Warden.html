@@ -68,23 +68,23 @@
                 e.preventDefault();return;
             }
 
-                        if (emailRegex.test(email)) {
-    return;
-} else {
-    alert("Invalid format. Please use your BVRIT email.");
-                e.preventDefault();return;
-}
-
 if (!namePattern.test(wName)) {
     alert("Warden Name can only contain letters and spaces.");
     e.preventDefault(); 
     return;
             }
+
+            if (!emailRegex.test(email)) {
+    alert("Invalid format. Please use your BVRIT email.");
+                e.preventDefault();return;
+}
             
         });
     </script>
 </body>
 
 </html>
+
+
 
 

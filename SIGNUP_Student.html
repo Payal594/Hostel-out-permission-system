@@ -125,29 +125,30 @@
                 e.preventDefault();return;
             }
 
-            if (emailRegex.test(emailInput)) {
-    return;
-} else {
-    alert("Invalid format. Please use your BVRIT email.");
-                e.preventDefault();return;
-}
 
             if (!roomPattern.test(roomNum)) {
     alert("Room Number must be exactly 3 Digits (0-9) and cannot contain symbols.");
     e.preventDefault(); 
     return;
 }
-            if (!namePattern.test(sName) && !namePattern.test(pName)) {
+            if (!namePattern.test(sName) || !namePattern.test(pName)) {
     alert("Student Name and Parent Name can only contain letters and spaces.");
     e.preventDefault(); 
     return;
             }
+
+             if (!emailRegex.test(emailInput)) {
+    alert("Invalid format. Please use your BVRIT email.");
+                e.preventDefault();return;
+}
             
         });
     </script>
 </body>
 
 </html>
+
+
 
 
 
