@@ -16,8 +16,8 @@
     <div class="container">
         <h2 style="text-align:center">Student Registration</h2>
         <form id="regForm" action="save_student.php" method="POST">
-            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
-            <input type="number" id="phone" name="phone" placeholder="Phone Number" required>
+           <input type="text" id="fullname" name="Fullname" class="form-control" placeholder="Enter Full name" required pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter Student Phone Number" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="email" id="email" name="email" placeholder="Email" required>
             
             <div class="radio-group">
@@ -147,6 +147,7 @@
 </body>
 
 </html>
+
 
 
 
