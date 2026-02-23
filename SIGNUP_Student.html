@@ -41,8 +41,8 @@
             </select>
 
             <input type="text" id="room_number" name="room_number" placeholder="Room Number (e.g. 101)" required>
-            <input type="text" id="parentName" name="parentName" placeholder="Parent Name" required>
-            <input type="number" id="parentPhone" name="parentPhone" placeholder="Parent Phone" required>
+            <input type="text" id="parentName" name="parentName" class="form-control" placeholder="Enter Parent Name" required pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="Enter Parent Phone Number" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
             <button type="submit">Register</button>
             <p style="text-align:center"><a href="login.html?role=student">Back to Login</a></p>
@@ -147,6 +147,7 @@
 </body>
 
 </html>
+
 
 
 
