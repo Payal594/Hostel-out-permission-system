@@ -6,7 +6,12 @@
     <style>
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; }
         .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; }
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        input[type="text"], input[type="tel"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        
+        /* Real-time visual feedback */
+        input:focus:invalid { border-color: red; outline: none; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        input:focus:valid { border-color: green; outline: none; box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+
         .radio-group { margin: 15px 0; font-weight: bold; color: #555; }
         .radio-group input { margin-left: 10px; margin-right: 5px; }
         button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 1rem; margin-top: 10px; }
@@ -16,9 +21,19 @@
     <div class="container">
         <h2 style="text-align:center">Student Registration</h2>
         <form id="regForm" action="save_student.php" method="POST">
-           <input type="text" id="fullname" name="Fullname" class="form-control" placeholder="Enter Full name" required pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-            <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter Student Phone Number" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-            <input type="email" id="email" name="email" placeholder="Email" required>
+            
+            <input type="text" id="fullname" name="Fullname" class="form-control" placeholder="Enter Full name" required 
+                   pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter Student Phone Number" required 
+                   pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, ''); checkPhoneMatch();">
+            
+            <input type="email" id="email" name="email" placeholder="Email (e.g. 12345A6789@bvrit.ac.in)" required 
+                   pattern="^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$" 
+                   title="Format: 5 numbers, 1 letter, 4 numbers, then @bvrit.ac.in"
+                   oninput="checkEmail()">
             
             <div class="radio-group">
                 <label>Gender: </label>
@@ -26,10 +41,16 @@
                 <input type="radio" name="gender" value="Female" required onclick="updateHostels(this.value)"> Female
             </div>
             
-            <input type="password" id="password" name="password" placeholder="Password (Min 8 chars)" required>
-            <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+            <input type="password" id="password" name="password" placeholder="Password (Min 8 chars, 1 Upper, 1 Num, 1 Symbol)" required 
+                   pattern="(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" 
+                   title="Must be at least 8 characters, with 1 uppercase, 1 number, and 1 symbol"
+                   oninput="checkPasswordMatch()">
+            
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required 
+                   oninput="checkPasswordMatch()">
             
             <select name="year" required>
+                <option value="" disabled selected>Select Year</option>
                 <option value="1">1st Year</option>
                 <option value="2">2nd Year</option>
                 <option value="3">3rd Year</option>
@@ -37,12 +58,20 @@
             </select>
             
             <select name="hostel" id="hostel" required>
-                <option value="">Select Gender First</option>
+                <option value="" disabled selected>Select Gender First</option>
             </select>
 
-            <input type="text" id="room_number" name="room_number" placeholder="Room Number (e.g. 101)" required>
-            <input type="text" id="parentName" name="parentName" class="form-control" placeholder="Enter Parent Name" required pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-            <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="Enter Parent Phone Number" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="room_number" name="room_number" placeholder="Room Number (e.g. 101)" required 
+                   pattern="[0-9]{3}" maxlength="3" title="Room number must be exactly 3 digits" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            
+            <input type="text" id="parentName" name="parentName" class="form-control" placeholder="Enter Parent Name" required 
+                   pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            
+            <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="Enter Parent Phone Number" required 
+                   pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, ''); checkPhoneMatch();">
 
             <button type="submit">Register</button>
             <p style="text-align:center"><a href="login.html?role=student">Back to Login</a></p>
@@ -50,14 +79,15 @@
     </div>
 
     <script>
+        // 1. Update Hostels
         function updateHostels(gender) {
             var hostelSelect = document.getElementById("hostel");
-            hostelSelect.innerHTML = "";
+            hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>'; 
             var options = [];
             
             if (gender === "Male") {
-                options = ["C V Ramam", "Bhatnagar", "Tagore","Nalanda","Ramanujan","C V Rao"];
-            } else {
+                options = ["C V Ramam", "Bhatnagar", "Tagore", "Nalanda", "Ramanujan", "C V Rao"];
+            } else if (gender === "Female") {
                 options = ["Spoorthi", "Prathiba"];
             }
             
@@ -69,86 +99,41 @@
             });
         }
 
-        document.getElementById('regForm').addEventListener('submit', function(e) {
-            var sPhone = document.getElementById('phone').value;
-            var pPhone = document.getElementById('parentPhone').value;
-            var pass = document.getElementById('password').value;
-            var confirmPass = document.getElementById('confirm_password').value;
-            var sName = document.getElementById('fullname').value;
-            var pName = document.getElementById('parentName').value;
-            var emailInput = document.getElementById('email').value;
-            var roomNum = document.getElementById('room_number').value;
-
-            // --- NEW: Strict Phone Validation ---
-            // Regex /^\d{10}$/ means: Start -> Digit -> Exactly 10 times -> End.
-            // It rejects negatives (which have a '-') and decimals.
-            var phonePattern = /^\d{10}$/;
-            const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
-            var roomPattern = /^\d{3}$/;
-            var namePattern = /^[a-zA-Z\s]+$/;
-
-            if (!phonePattern.test(sPhone)) {
-                alert("Student Phone Number must be EXACTLY 10 digits and cannot be negative!");
-                e.preventDefault(); return;
-            }
-
-            if (!phonePattern.test(pPhone)) {
-                alert("Parent Phone Number must be EXACTLY 10 digits and cannot be negative!");
-                e.preventDefault(); return;
-            }
-            // ------------------------------------
-
-            if (sPhone === pPhone) {
-                alert("Student and Parent Phone cannot be the same!");
-                e.preventDefault(); return;
-            }
+        // 2. Real-time Email Check (Roll Number Format)
+        function checkEmail() {
+            var emailInput = document.getElementById('email');
+            var emailPattern = /^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$/;
             
-            if (pass !== confirmPass) {
-                alert("Passwords do not match!");
-                e.preventDefault(); return;
+            if (!emailPattern.test(emailInput.value) && emailInput.value !== "") {
+                emailInput.setCustomValidity("Format: 5 numbers, 1 letter, 4 numbers, then @bvrit.ac.in (e.g., 22113A0532@bvrit.ac.in)");
+            } else {
+                emailInput.setCustomValidity("");
             }
+        }
 
-            if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
-                alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
-                e.preventDefault(); return;
-            }
+        // 3. Real-time Password Match
+        function checkPasswordMatch() {
+            var pass = document.getElementById('password');
+            var confirmPass = document.getElementById('confirm_password');
             
-            sName = sName.trim();
-            if (sName === '') {
-                alert("The Student name cannot be blank !");
-                e.preventDefault();return;
+            if (pass.value !== confirmPass.value && confirmPass.value !== "") {
+                confirmPass.setCustomValidity("Passwords do not match.");
+            } else {
+                confirmPass.setCustomValidity("");
             }
+        }
 
-            pName = pName.trim();
-            if (pName === '') {
-                alert("The Parent Name cannot be blank!");
-                e.preventDefault();return;
-            }
-
-
-            if (!roomPattern.test(roomNum)) {
-    alert("Room Number must be exactly 3 Digits (0-9) and cannot contain symbols.");
-    e.preventDefault(); 
-    return;
-}
-
-             if (!emailRegex.test(emailInput)) {
-    alert("Invalid format. Please use your BVRIT email.");
-                e.preventDefault();return;
-}
+        // 4. Real-time Phone Match (Prevents Student and Parent having the same number)
+        function checkPhoneMatch() {
+            var sPhone = document.getElementById('phone');
+            var pPhone = document.getElementById('parentPhone');
             
-        });
+            if (sPhone.value === pPhone.value && pPhone.value !== "") {
+                pPhone.setCustomValidity("Student and Parent phone numbers cannot be the same.");
+            } else {
+                pPhone.setCustomValidity("");
+            }
+        }
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
