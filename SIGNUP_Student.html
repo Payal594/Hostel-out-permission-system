@@ -23,14 +23,15 @@
         <form id="regForm" action="save_student.php" method="POST">
             
             <input type="text" id="fullname" name="Fullname" class="form-control" placeholder="Enter Full name" required 
-                   pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" 
-                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+                   pattern="^[A-Za-z]+( [A-Za-z]+)*$" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+                   onblur="this.value = this.value.trim()">
             
             <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter Student Phone Number" required 
                    pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
                    oninput="this.value = this.value.replace(/[^0-9]/g, ''); checkPhoneMatch();">
             
-            <input type="email" id="email" name="email" placeholder="Email (e.g. 12345A6789@bvrit.ac.in)" required 
+            <input type="email" id="email" name="email" placeholder="Email (e.g. 24211A6743@bvrit.ac.in)" required 
                    pattern="^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$" 
                    title="Format: 5 numbers, 1 letter, 4 numbers, then @bvrit.ac.in"
                    oninput="checkEmail()">
@@ -66,8 +67,9 @@
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             
             <input type="text" id="parentName" name="parentName" class="form-control" placeholder="Enter Parent Name" required 
-                   pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" 
-                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+                   pattern="^[A-Za-z]+( [A-Za-z]+)*$" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+                   onblur="this.value = this.value.trim()">
             
             <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="Enter Parent Phone Number" required 
                    pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
