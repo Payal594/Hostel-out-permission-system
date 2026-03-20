@@ -8,7 +8,6 @@
         .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; }
         input[type="text"], input[type="tel"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
         
-        /* Real-time visual feedback */
         input:focus:invalid { border-color: red; outline: none; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
         input:focus:valid { border-color: green; outline: none; box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
 
@@ -81,7 +80,7 @@
     </div>
 
     <script>
-        // 1. Update Hostels
+       
         function updateHostels(gender) {
             var hostelSelect = document.getElementById("hostel");
             hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>'; 
@@ -101,7 +100,6 @@
             });
         }
 
-        // 2. Real-time Email Check (Roll Number Format)
         function checkEmail() {
             var emailInput = document.getElementById('email');
             var emailPattern = /^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$/;
@@ -113,7 +111,6 @@
             }
         }
 
-        // 3. Real-time Password Match
         function checkPasswordMatch() {
             var pass = document.getElementById('password');
             var confirmPass = document.getElementById('confirm_password');
@@ -125,7 +122,6 @@
             }
         }
 
-        // 4. Real-time Phone Match (Prevents Student and Parent having the same number)
         function checkPhoneMatch() {
             var sPhone = document.getElementById('phone');
             var pPhone = document.getElementById('parentPhone');
