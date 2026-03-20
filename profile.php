@@ -2,28 +2,53 @@
 session_start();
 include 'db_connect.php';
 
-// 1. Security Check
-if (!isset($_SESSION['user_id'])) { header("Location: index.html"); exit(); }
+
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: index.html"); 
+    exit(); 
+}
 
 $role = $_SESSION['role'];
 $uid = $_SESSION['user_id'];
-$table = ($role == 'student') ? 'students' : 'wardens';
 
-// 2. Handle Form Update
+
+if ($role == 'student') {
+    $table = 'students';
+} elseif ($role == 'warden') {
+    $table = 'wardens';
+} elseif ($role == 'teacher') {
+    $table = 'teachers';
+} else {
+    die("Error: Unrecognized user role.");
+}
+
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $phone = $_POST['phone'];
+    
+   
+    $phone = trim($_POST['phone']);
+    
+  
+    if (!preg_match('/^[0-9]{10}$/', $phone)) {
+        echo "<script>alert('Error: Phone number must be exactly 10 digits.'); window.history.back();</script>";
+        exit();
+    }
+
     
     if ($role == 'student') {
-        // Students update Phone, Hostel, and Room
         $hostel = $_POST['hostel'];
         $room = $_POST['room_number'];
-        
         $sql = "UPDATE students SET phone=?, hostel_name=?, room_number=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sssi", $phone, $hostel, $room, $uid);
-    } else {
-        // Wardens only update Phone (Hostel assigned by Admin usually)
+
+    } elseif ($role == 'warden') {
         $sql = "UPDATE wardens SET phone=? WHERE id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $phone, $uid);
+
+    } elseif ($role == 'teacher') {
+        $sql = "UPDATE teachers SET phone=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $phone, $uid);
     }
@@ -31,12 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute()) {
         echo "<script>alert('Profile Updated Successfully!'); window.location.href='profile.php';</script>";
     } else {
-        echo "<script>alert('Error updating profile.');</script>";
+        echo "<script>alert('Error updating profile: " . $stmt->error . "');</script>";
     }
 }
 
-// 3. Fetch Current Data
+// 3. Fetch Current Data for Display
 $res = mysqli_query($conn, "SELECT * FROM $table WHERE id='$uid'");
+if (!$res || mysqli_num_rows($res) == 0) {
+    die("Error: Could not fetch user data. Please log in again.");
+}
 $data = mysqli_fetch_assoc($res);
 ?>
 
@@ -89,35 +117,62 @@ $data = mysqli_fetch_assoc($res);
         <form method="POST">
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" value="<?php echo $data['fullname']; ?>" disabled>
+                <input type="text" value="<?php echo htmlspecialchars($data['fullname']); ?>" disabled>
             </div>
             
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="text" value="<?php echo $data['email']; ?>" disabled>
+                <input type="text" value="<?php echo htmlspecialchars($data['email']); ?>" disabled>
             </div>
 
             <div class="form-group">
-                <label>Phone Number</label>
-                <input type="number" name="phone" value="<?php echo $data['phone']; ?>" required>
-            </div>
+    <label>Phone Number</label>
+    <input type="tel" name="phone" 
+           maxlength="10" 
+           pattern="[0-9]{10}" 
+           title="Please enter exactly 10 digits"
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+           value="<?php echo isset($data['phone']) ? htmlspecialchars($data['phone']) : ''; ?>" required>
+</div>
 
             <?php if($role == 'student'): ?>
             <div class="form-group">
                 <label>Hostel Name</label>
-                <select name="hostel" required>
-                    <option value="<?php echo $data['hostel_name']; ?>" selected><?php echo $data['hostel_name']; ?> (Current)</option>
-                    <option value="Boys Hostel A">Boys Hostel A</option>
-                    <option value="Boys Hostel B">Boys Hostel B</option>
-                    <option value="Girls Hostel A">Girls Hostel A</option>
-                    <option value="Girls Hostel B">Girls Hostel B</option>
+                <select name="hostel" id="hostelSelect" class="form-control" required>
+                    <option value="<?php echo htmlspecialchars($data['hostel_name']); ?>" selected>
+                        <?php echo htmlspecialchars($data['hostel_name']); ?> (Current)
+                    </option>
+
+                    <?php 
+                    $userGender = strtolower($data['gender'] ?? ''); 
+
+                    if ($userGender == 'male'): ?>
+                        <option value="C V Ramam">C V Ramam</option>
+                        <option value="Bhatnagar">Bhatnagar</option>
+                        <option value="Tagore">Tagore</option>
+                        <option value="Nalanda">Nalanda</option>
+                        <option value="Ramanujan">Ramanujan</option>
+                        <option value="C V Rao">C V Rao</option>
+                    
+                    <?php elseif ($userGender == 'female'): ?>
+                        <option value="Spoorthi">Spoorthi</option>
+                        <option value="Prathiba">Prathiba</option>
+                    
+                    <?php else: ?>
+                        <option value="" disabled>Please set gender in profile</option>
+                    <?php endif; ?>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Room Number</label>
-                <input type="text" name="room_number" value="<?php echo $data['room_number']; ?>" required>
-            </div>
+    <label>Room Number</label>
+    <input type="text" name="room_number" 
+           maxlength="3" 
+           pattern="[0-9]{3}" 
+           title="Please enter exactly 3 digits"
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+           value="<?php echo htmlspecialchars($data['room_number']); ?>" required>
+</div>
             <?php endif; ?>
             
             <button type="submit" class="btn-update">Save Changes</button>
@@ -126,7 +181,7 @@ $data = mysqli_fetch_assoc($res);
         <div class="links">
             <a href="forgot_password.html" class="forgot-pass">Change / Forgot Password?</a>
             <br><br>
-            <a href="<?php echo $role; ?>_dashboard.php">← Back to Dashboard</a>
+            <a href="<?php echo htmlspecialchars($role); ?>_dashboard.php">← Back to Dashboard</a>
         </div>
     </div>
 
