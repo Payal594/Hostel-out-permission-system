@@ -7,8 +7,6 @@
         body { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); display: flex; justify-content: center; padding: 20px; font-family: 'Segoe UI', sans-serif; }
         .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 450px; }
         input[type="text"], input[type="tel"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
-        
-        /* Real-time visual feedback: Red for invalid, Green for valid */
         input:focus:invalid { border-color: red; outline: none; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
         input:focus:valid { border-color: green; outline: none; box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
 
@@ -23,8 +21,9 @@
         <form id="wardenForm" action="save_warden.php" method="POST">
             
             <input type="text" id="fullname" name="fullname" placeholder="Full Name" required 
-                   pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" 
-                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+                   pattern="^[A-Za-z]+( [A-Za-z]+)*$" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+                   onblur="this.value = this.value.trim()">
             
             <input type="tel" id="phone" name="phone" placeholder="Phone Number" required 
                    pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
@@ -55,7 +54,6 @@
     </div>
 
     <script>
-        // Real-time check to ensure email ends with @bvrit.ac.in
         function checkEmail() {
             var emailInput = document.getElementById('email');
             var emailPattern = /^[a-zA-Z0-9._]+@bvrit\.ac\.in$/;
@@ -66,8 +64,6 @@
                 emailInput.setCustomValidity("");
             }
         }
-
-        // Real-time check to ensure passwords match exactly
         function checkPasswordMatch() {
             var pass = document.getElementById('password');
             var confirmPass = document.getElementById('confirm_password');
