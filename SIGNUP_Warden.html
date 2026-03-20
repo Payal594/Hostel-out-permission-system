@@ -6,19 +6,33 @@
     <style>
         body { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); display: flex; justify-content: center; padding: 20px; font-family: 'Segoe UI', sans-serif; }
         .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 450px; }
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        input[type="text"], input[type="tel"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        input:focus:invalid { border-color: red; outline: none; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        input:focus:valid { border-color: green; outline: none; box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+
         .radio-group { margin: 15px 0; font-weight: bold; color: #555; }
         .radio-group input { margin-left: 10px; margin-right: 5px; }
-        button { width: 100%; padding: 12px; background: #11998e; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+        button { width: 100%; padding: 12px; background: #11998e; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 10px; font-size: 1rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2 style="text-align:center;">Warden Register</h2>
         <form id="wardenForm" action="save_warden.php" method="POST">
-            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
-            <input type="number" id="phone" name="phone" placeholder="Phone Number" required>
-            <input type="email" id="email" name="email" placeholder="Email" required>
+            
+            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required 
+                   pattern="^[A-Za-z]+( [A-Za-z]+)*$" title="Only letters and spaces are allowed" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+                   onblur="this.value = this.value.trim()">
+            
+            <input type="tel" id="phone" name="phone" placeholder="Phone Number" required 
+                   pattern="[0-9]{10}" maxlength="10" title="Please enter exactly 10 digits" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            
+            <input type="email" id="email" name="email" placeholder="Email (e.g. name@bvrit.ac.in)" required 
+                   pattern="^[a-zA-Z0-9._]+@bvrit\.ac\.in$" 
+                   title="Must be a valid BVRIT email ending in @bvrit.ac.in"
+                   oninput="checkEmail()">
             
             <div class="radio-group">
                 <label>I manage: </label>
@@ -26,8 +40,13 @@
                 <input type="radio" name="gender" value="Female" required> Girls Hostel
             </div>
 
-            <input type="password" id="password" name="password" placeholder="Password" required>
-            <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+            <input type="password" id="password" name="password" placeholder="Password (Min 8 chars, 1 Upper, 1 Num, 1 Symbol)" required 
+                   pattern="(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" 
+                   title="Must be at least 8 characters, with 1 uppercase, 1 number, and 1 symbol"
+                   oninput="checkPasswordMatch()">
+            
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required 
+                   oninput="checkPasswordMatch()">
 
             <button type="submit">Register</button>
             <p style="text-align:center"><a href="login.html?role=warden">Back to Login</a></p>
@@ -35,56 +54,26 @@
     </div>
 
     <script>
-        document.getElementById('wardenForm').addEventListener('submit', function(e) {
-            var phone = document.getElementById('phone').value;
-            var pass = document.getElementById('password').value;
-            var confirmPass = document.getElementById('confirm_password').value;
-            var wName = document.getElementById('fullname').value;
-            var email = document.getElementById('email').value;
-            const emailRegex = /^[a-zA-Z0-9]+@bvrit\.ac\.in$/;
-            var namePattern = /^[a-zA-Z\s]+$/;
-
-            // --- NEW: Strict Phone Validation ---
-            var phonePattern = /^\d{10}$/;
-            if (!phonePattern.test(phone)) {
-                alert("Phone Number must be EXACTLY 10 digits and cannot be negative!");
-                e.preventDefault(); return;
-            }
-            // ------------------------------------
-
-            if (pass !== confirmPass) {
-                alert("Passwords do not match!");
-                e.preventDefault(); return;
-            }
-
-            if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
-                alert("Password too weak! Must be 8+ chars, with Uppercase, Number, and Symbol.");
-                e.preventDefault(); return;
-            }
-
-            wName = wName.trim();
-            if (wName === '') {
-                alert("The Student name cannot be blank !");
-                e.preventDefault();return;
-            }
-
-if (!namePattern.test(wName)) {
-    alert("Warden Name can only contain letters and spaces.");
-    e.preventDefault(); 
-    return;
-            }
-
-            if (!emailRegex.test(email)) {
-    alert("Invalid format. Please use your BVRIT email.");
-                e.preventDefault();return;
-}
+        function checkEmail() {
+            var emailInput = document.getElementById('email');
+            var emailPattern = /^[a-zA-Z0-9._]+@bvrit\.ac\.in$/;
             
-        });
+            if (!emailPattern.test(emailInput.value) && emailInput.value !== "") {
+                emailInput.setCustomValidity("Must be a valid BVRIT email ending in @bvrit.ac.in");
+            } else {
+                emailInput.setCustomValidity("");
+            }
+        }
+        function checkPasswordMatch() {
+            var pass = document.getElementById('password');
+            var confirmPass = document.getElementById('confirm_password');
+            
+            if (pass.value !== confirmPass.value && confirmPass.value !== "") {
+                confirmPass.setCustomValidity("Passwords do not match.");
+            } else {
+                confirmPass.setCustomValidity("");
+            }
+        }
     </script>
 </body>
-
 </html>
-
-
-
-
