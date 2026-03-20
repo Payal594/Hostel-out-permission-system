@@ -179,7 +179,7 @@ $data = mysqli_fetch_assoc($res);
         </form>
 
         <div class="links">
-            <a href="forgot_password.html" class="forgot-pass">Change / Forgot Password?</a>
+            <a href="reset_password.html" class="forgot-pass">Change / Forgot Password?</a>
             <br><br>
             <a href="<?php echo htmlspecialchars($role); ?>_dashboard.php">← Back to Dashboard</a>
         </div>
