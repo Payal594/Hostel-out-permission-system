@@ -104,15 +104,32 @@ $data = mysqli_fetch_assoc($res);
 
             <?php if($role == 'student'): ?>
             <div class="form-group">
-                <label>Hostel Name</label>
-                <select name="hostel" required>
-                    <option value="<?php echo $data['hostel_name']; ?>" selected><?php echo $data['hostel_name']; ?> (Current)</option>
-                    <option value="Boys Hostel A">Boys Hostel A</option>
-                    <option value="Boys Hostel B">Boys Hostel B</option>
-                    <option value="Girls Hostel A">Girls Hostel A</option>
-                    <option value="Girls Hostel B">Girls Hostel B</option>
-                </select>
-            </div>
+        <label>Hostel Name</label>
+        <select name="hostel" id="hostelSelect" class="form-control" required>
+            <option value="<?php echo $data['hostel_name']; ?>" selected>
+                <?php echo $data['hostel_name']; ?> (Current)
+            </option>
+
+            <?php 
+            $userGender = strtolower($data['gender']); 
+
+            if ($userGender == 'male'): ?>
+                <option value="C V Ramam">C V Ramam</option>
+                <option value="Bhatnagar">Bhatnagar</option>
+                <option value="Tagore">Tagore</option>
+                <option value="Nalanda">Nalanda</option>
+                <option value="Ramanujan">Ramanujan</option>
+                <option value="C V Rao">C V Rao</option>
+            
+            <?php elseif ($userGender == 'female'): ?>
+                <option value="Spoorthi">Spoorthi</option>
+                <option value="Prathiba">Prathiba</option>
+            
+            <?php else: ?>
+                <option value="" disabled>Please set gender in profile</option>
+            <?php endif; ?>
+        </select>
+    </div>
 
             <div class="form-group">
                 <label>Room Number</label>
