@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f4f7f6; transition: background 0.5s ease; }
+        .login-card { background: white; padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; animation: fadeIn 0.6s ease-out; }
+        h2 { margin-bottom: 10px; color: #333; font-size: 2rem; font-weight: 700; }
+        p { margin-bottom: 30px; color: #666; font-size: 0.95rem; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; font-size: 0.9rem; }
+        input { width: 100%; padding: 12px 15px; border: 2px solid #e1e1e1; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; }
+        input:focus { box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px; background: #333; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .footer-links { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
+        .footer-links a { text-decoration: none; color: #777; transition: color 0.2s; }
+        .footer-links a:hover { color: #333; text-decoration: underline; }
+        .forgot-pass { color: #d9534f !important; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    <!-- Load Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="login-card">
+        <h2 id="roleTitle">Login</h2>
+        <p>Please enter your credentials</p>
+
+        <form id="loginForm">
+            <input type="hidden" id="roleInput">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="emailInput" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="passInput" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" id="loginBtn">Sign In</button>
+
+            <div class="footer-links">
+                <a href="#" id="signupLink">Create New Account</a>
+                <a href="reset_password.html" class="forgot-pass">Forgot Password?</a>
+                <a href="index.html">← Back to Home</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role') || 'student'; 
+        
+        const body = document.body;
+        const title = document.getElementById('roleTitle');
+        const btn = document.getElementById('loginBtn');
+        const signupLink = document.getElementById('signupLink');
+        const roleInput = document.getElementById('roleInput');
+        const inputs = document.querySelectorAll('input');
+
+        roleInput.value = role;
+
+        // UI Styling based on role
+        if (role === 'student') {
+            body.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            btn.style.background = "linear-gradient(to right, #667eea, #764ba2)";
+            title.innerText = "Student Login";
+            title.style.color = "#667eea";
+            signupLink.href = "SIGNUP_Student.html";
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#667eea'));
+        } else if (role === 'warden') {
+            body.style.background = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)";
+            btn.style.background = "linear-gradient(to right, #11998e, #38ef7d)";
+            title.innerText = "Warden Login";
+            title.style.color = "#11998e";
+            signupLink.href = "SIGNUP_Warden.html";
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#11998e'));
+        } else if (role === 'teacher') {
+            body.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
+            btn.style.background = "linear-gradient(to right, #ff9966, #ff5e62)";
+            title.innerText = "Teacher Login";
+            title.style.color = "#ff9966";
+            signupLink.style.display = "none"; 
+            inputs.forEach(i => i.addEventListener('focus', () => i.style.borderColor = '#ff9966'));
+        }
+        inputs.forEach(i => i.addEventListener('blur', () => i.style.borderColor = '#e1e1e1'));
+
+        // SUPABASE CONNECTION
+        const supabaseUrl = 'https://rekuelfrjkgeabhbsvqy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJla3VlbGZyamtnZWFiaGJzdnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzY3MzEsImV4cCI6MjA5MDAxMjczMX0.3yxUU9Qls7enZdSceXmLkst0CiMkkt2UuUTH7n63E0o'; 
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passInput').value;
+            
+            btn.innerText = "Checking...";
+            btn.disabled = true;
+
+            let tableName = '';
+            if (role === 'student') tableName = 'students';
+            else if (role === 'warden') tableName = 'wardens';
+            else if (role === 'teacher') tableName = 'teachers';
+
+         
+            const { data, error } = await supabaseClient
+                .from(tableName)
+                .select('*')
+                .eq('email', email)
+                .eq('password', password)
+                .single(); 
+
+            if (error || !data) {
+                alert(`Invalid Credentials for ${role}!`);
+                btn.innerText = "Sign In";
+                btn.disabled = false;
+            } else {
+                
+                localStorage.setItem('user_email', data.email);
+                localStorage.setItem('user_role', role);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('user_id', data.id);
+                
+              
+                window.location.href = role + "_dashboard.html";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Registration</title>
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; }
+        .container { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; }
+        input[type="text"], input[type="tel"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+        input:focus:invalid { border-color: red; outline: none; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        input:focus:valid { border-color: green; outline: none; box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+        .radio-group { margin: 15px 0; font-weight: bold; color: #555; }
+        .radio-group input { margin-left: 10px; margin-right: 5px; }
+        button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 1rem; margin-top: 10px; }
+    </style>
+    <!-- 1. Load the Supabase JavaScript Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align:center">Student Registration</h2>
+        <form id="regForm">
+            <input type="text" id="fullname" placeholder="Enter Full name" required pattern="^[A-Za-z]+( [A-Za-z]+)*$" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            <input type="tel" id="phone" placeholder="Enter Student Phone Number" required pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, ''); checkPhoneMatch();">
+            <input type="email" id="email" placeholder="Email (e.g. 24211A6743@bvrit.ac.in)" required pattern="^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$" oninput="checkEmail()">
+            
+            <div class="radio-group">
+                <label>Gender: </label>
+                <input type="radio" name="gender" value="Male" required onclick="updateHostels(this.value)"> Male
+                <input type="radio" name="gender" value="Female" required onclick="updateHostels(this.value)"> Female
+            </div>
+            
+            <input type="password" id="password" placeholder="Password (Min 8 chars, 1 Upper, 1 Num, 1 Symbol)" required pattern="(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" oninput="checkPasswordMatch()">
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required oninput="checkPasswordMatch()">
+            
+            <select id="year" required>
+                <option value="" disabled selected>Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+            </select>
+            
+            <select id="hostel" required><option value="" disabled selected>Select Gender First</option></select>
+            <input type="text" id="room_number" placeholder="Room Number (e.g. 101)" required pattern="[0-9]{3}" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="parentName" placeholder="Enter Parent Name" required oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+            <input type="tel" id="parentPhone" placeholder="Enter Parent Phone Number" required pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, ''); checkPhoneMatch();">
+
+            <button type="submit" id="submitBtn">Register</button>
+            <p style="text-align:center"><a href="login.html?role=student">Back to Login</a></p>
+        </form>
+    </div>
+
+    <script>
+    // UI Helpers
+    function updateHostels(gender) {
+        const hostelSelect = document.getElementById("hostel");
+        hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>'; 
+        const options = gender === "Male" ? ["C V Ramam", "Bhatnagar", "Tagore", "Nalanda", "Ramanujan", "C V Rao"] : ["Spoorthi", "Prathiba"];
+        options.forEach(h => {
+            const opt = document.createElement("option");
+            opt.value = h; opt.innerText = h;
+            hostelSelect.appendChild(opt);
+        });
+    }
+    function checkEmail() {
+        const emailInput = document.getElementById('email');
+        const pattern = /^[0-9]{5}[a-zA-Z][0-9]{4}@bvrit\.ac\.in$/;
+        emailInput.setCustomValidity(!pattern.test(emailInput.value) && emailInput.value !== "" ? "Format: 5 numbers, 1 letter, 4 numbers, then @bvrit.ac.in" : "");
+    }
+    function checkPasswordMatch() {
+        const pass = document.getElementById('password'), confirmPass = document.getElementById('confirm_password');
+        confirmPass.setCustomValidity(pass.value !== confirmPass.value && confirmPass.value !== "" ? "Passwords do not match." : "");
+    }
+    function checkPhoneMatch() {
+        const sPhone = document.getElementById('phone'), pPhone = document.getElementById('parentPhone');
+        pPhone.setCustomValidity(sPhone.value === pPhone.value && pPhone.value !== "" ? "Student and Parent phones cannot be the same." : "");
+    }
+
+    // ==========================================
+    // SUPABASE CONNECTION & LOGIC
+    // ==========================================
+    
+    // PASTE YOUR URL AND KEY HERE:
+    const supabaseUrl = 'https://rekuelfrjkgeabhbsvqy.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJla3VlbGZyamtnZWFiaGJzdnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzY3MzEsImV4cCI6MjA5MDAxMjczMX0.3yxUU9Qls7enZdSceXmLkst0CiMkkt2UuUTH7n63E0o';
+    
+    // FIX: We changed 'supabase' to 'supabaseClient' here!
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('regForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "Registering...";
+        btn.disabled = true;
+
+        const studentData = {
+            fullname: document.getElementById('fullname').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            password: document.getElementById('password').value,
+            study_year: document.getElementById('year').value,
+            hostel_name: document.getElementById('hostel').value,
+            room_number: document.getElementById('room_number').value,
+            parent_name: document.getElementById('parentName').value,
+            parent_phone: document.getElementById('parentPhone').value
+        };
+
+        // FIX: We changed 'supabase' to 'supabaseClient' here too!
+        const { data, error } = await supabaseClient
+            .from('students')
+            .insert([studentData]);
+
+        if (error) {
+            // '23505' is the PostgreSQL error code for a duplicate unique key (email)
+            if(error.code === '23505') {
+                alert("Account already exists with this email!");
+            } else {
+                alert("Error: " + error.message);
+            }
+            btn.innerText = "Register";
+            btn.disabled = false;
+        } else {
+            alert('Account Created Successfully!');
+            window.location.href = 'login.html?role=student';
+        }
+    });
+</script>
+</body>
+</html>

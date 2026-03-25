@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .profile-card { background: white; width: 100%; max-width: 500px; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .header h2 { color: #333; margin-bottom: 5px; }
+        .header p { color: #777; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; transition: 0.3s; }
+        input:focus, select:focus { border-color: #333; outline: none; }
+        input:disabled { background: #f9f9f9; color: #888; cursor: not-allowed; border-color: #eee; }
+        .btn-update { width: 100%; padding: 14px; background: #333; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .btn-update:hover { background: #555; }
+        .links { margin-top: 20px; text-align: center; font-size: 14px; }
+        .links a { color: #777; text-decoration: none; margin: 0 10px; }
+        .links a:hover { color: #333; text-decoration: underline; }
+        .forgot-pass { color: #d9534f !important; font-weight: bold; }
+    </style>
+    <!-- Load Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="profile-card">
+        <div class="header">
+            <h2>My Profile</h2>
+            <p>Role: <span id="displayRole">Loading...</span></p>
+        </div>
+
+        <form id="profileForm">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullname" disabled>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="text" id="email" disabled>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            </div>
+
+            <!-- Student Only Fields -->
+            <div id="studentFields" style="display: none;">
+                <div class="form-group">
+                    <label>Hostel Name</label>
+                    <select id="hostelSelect" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>Room Number</label>
+                    <input type="text" id="room_number" maxlength="3" pattern="[0-9]{3}" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+            </div>
+            
+            <button type="submit" id="updateBtn" class="btn-update">Save Changes</button>
+        </form>
+
+        <div class="links">
+            <a href="reset_password.html" class="forgot-pass">Change / Forgot Password?</a><br><br>
+            <a href="#" id="backLink">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // SUPABASE CONNECTION
+        const supabaseUrl = 'https://rekuelfrjkgeabhbsvqy.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJla3VlbGZyamtnZWFiaGJzdnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzY3MzEsImV4cCI6MjA5MDAxMjczMX0.3yxUU9Qls7enZdSceXmLkst0CiMkkt2UuUTH7n63E0o'; 
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUserId = localStorage.getItem('user_id');
+        let currentUserRole = localStorage.getItem('user_role');
+        let tableName = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if(localStorage.getItem('isLoggedIn') !== 'true' || !currentUserId) {
+                window.location.href = 'index.html'; return;
+            }
+
+            document.getElementById('displayRole').innerText = currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+            document.getElementById('backLink').href = currentUserRole + '_dashboard.html';
+
+            
+            if (currentUserRole === 'student') tableName = 'students';
+            else if (currentUserRole === 'warden') tableName = 'wardens';
+            else if (currentUserRole === 'teacher') tableName = 'teachers';
+
+          
+            const { data: user, error } = await supabaseClient
+                .from(tableName)
+                .select('*')
+                .eq('id', currentUserId)
+                .single();
+            
+            if (user) {
+                document.getElementById('fullname').value = user.fullname || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = user.phone || '';
+
+                if(currentUserRole === 'student') {
+                    document.getElementById('studentFields').style.display = 'block';
+                    document.getElementById('room_number').value = user.room_number || '';
+                    document.getElementById('room_number').required = true;
+                    
+           
+                    const hostelSelect = document.getElementById('hostelSelect');
+                    const options = user.gender === 'Male' 
+                        ? ["C V Ramam", "Bhatnagar", "Tagore", "Nalanda", "Ramanujan", "C V Rao"] 
+                        : ["Spoorthi", "Prathiba"];
+                    
+                    options.forEach(h => {
+                        const opt = document.createElement('option');
+                        opt.value = h;
+                        opt.innerText = h;
+                        if(user.hostel_name === h) opt.selected = true; 
+                        hostelSelect.appendChild(opt);
+                    });
+                }
+            } else if (error) {
+                console.error("Error loading profile: ", error);
+            }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('updateBtn');
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            let updateData = { phone: document.getElementById('phone').value };
+
+          
+            if(currentUserRole === 'student') {
+                updateData.hostel_name = document.getElementById('hostelSelect').value;
+                updateData.room_number = document.getElementById('room_number').value;
+            }
+
+           
+            const { error } = await supabaseClient
+                .from(tableName)
+                .update(updateData)
+                .eq('id', currentUserId);
+
+            if (error) {
+                alert('Error updating profile: ' + error.message);
+            } else {
+                alert('Profile Updated Successfully!');
+            }
+            
+            btn.innerText = "Save Changes"; btn.disabled = false;
+        });
+    </script>
+</body>
+</html>

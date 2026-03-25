@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar h2 { font-size: 22px; margin-bottom: 30px; text-align: center; }
+        .user-info { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .sidebar a { color: rgba(255,255,255,0.9); text-decoration: none; padding: 12px 15px; margin: 5px 0; border-radius: 8px; transition: all 0.3s; display: block; font-weight: 500; }
+        .sidebar a:hover { background: rgba(255,255,255,0.2); color: white; padding-left: 20px; }
+        .logout-btn { margin-top: auto; background: rgba(0,0,0,0.1); text-align: center; cursor: pointer;}
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .info-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 5px solid #667eea; display: flex; justify-content: space-between; align-items: center; }
+        .form-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { padding: 12px 25px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; float: right; }
+        button:hover { background: #5a6fd6; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        th { background: #667eea; color: white; padding: 15px; text-align: left; font-size: 14px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .pending { background: #fff3cd; color: #856404; }
+        .approved { background: #d4edda; color: #155724; }
+        .rejected { background: #f8d7da; color: #721c24; }
+    </style>
+    <!-- Load Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="user-info">
+            <h2>Student Panel</h2>
+            <p id="displayFullname">Loading...</p>
+        </div>
+        <a href="student_dashboard.html">📊 Dashboard</a>
+        <a href="profile.html">👤 My Profile</a>
+        <a onclick="logout()" class="logout-btn">🚪 Logout</a>
+    </div>
+
+    <div class="main">
+        <div class="info-card">
+            <div><h3>🛡️ Assigned Warden</h3><p id="wardenName">Loading...</p></div>
+            <span id="wardenPhone">📞 --</span>
+        </div>
+
+        <div class="form-card">
+            <h3 style="margin-bottom:20px;">New Out Request</h3>
+            <form id="requestForm">
+                <div class="form-row">
+                    <div class="form-group"><label>Request Type</label><select id="reqType"><option value="Normal">Normal</option><option value="Urgent">Urgent</option></select></div>
+                    <div class="form-group"><label>Where are you going?</label><input type="text" id="destination" placeholder="e.g. Home, Market, Hospital" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Out Date</label><input type="date" id="outDate" required></div>
+                    <div class="form-group"><label>Out Time</label><input type="time" id="outTime" required></div>
+                    <div class="form-group"><label>Return Date</label><input type="date" id="inDate" required></div>
+                </div>
+                <div class="form-group"><label>Reason</label><textarea id="reason" placeholder="Detailed reason..." required style="height:80px;"></textarea></div>
+                <button type="submit" id="submitBtn">Submit Request</button>
+                <div style="clear:both"></div>
+            </form>
+        </div>
+
+        <h3>Request History</h3>
+        <table>
+            <thead><tr><th>Where To</th><th>Out</th><th>Return</th><th>Teacher</th><th>Status</th></tr></thead>
+            <tbody id="historyTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Setup Date Mins
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('outDate').setAttribute('min', today);
+        document.getElementById('inDate').setAttribute('min', today);
+
+        // SUPABASE CONNECTION
+        const supabaseUrl = 'https://rekuelfrjkgeabhbsvqy.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJla3VlbGZyamtnZWFiaGJzdnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzY3MzEsImV4cCI6MjA5MDAxMjczMX0.3yxUU9Qls7enZdSceXmLkst0CiMkkt2UuUTH7n63E0o';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('user_id');
+            if(localStorage.getItem('isLoggedIn') !== 'true' || localStorage.getItem('user_role') !== 'student' || !userId) {
+                window.location.href = 'login.html?role=student'; return;
+            }
+
+            // 1. Fetch Student Info
+            const { data: student } = await supabaseClient.from('students').select('*').eq('id', userId).single();
+            if(student) {
+                currentUser = student;
+                document.getElementById('displayFullname').innerText = student.fullname;
+                
+                // 2. Fetch Warden Info
+                const { data: warden } = await supabaseClient.from('wardens').select('*').eq('gender', student.gender).limit(1).single();
+                if(warden) {
+                    document.getElementById('wardenName').innerText = warden.fullname;
+                    document.getElementById('wardenPhone').innerText = "📞 " + warden.phone;
+                } else {
+                    document.getElementById('wardenName').innerText = "Not Assigned";
+                }
+            }
+            renderTable(userId);
+        });
+
+        document.getElementById('requestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Submitting..."; btn.disabled = true;
+
+            const outDate = document.getElementById('outDate').value;
+            const outTime = document.getElementById('outTime').value;
+            
+            // Logic for Teacher Approval
+            const dayOfWeek = new Date(outDate).getDay();
+            const isWorkingDay = (dayOfWeek !== 0 && dayOfWeek !== 6); // Assuming Mon-Fri
+            const isCollegeHours = (outTime >= '09:00' && outTime <= '15:30');
+            
+            const teacherApp = (isWorkingDay && isCollegeHours) ? "Pending" : "Not Required";
+            const finalStatus = (teacherApp === "Pending") ? "Pending Teacher" : "Pending Warden";
+
+            const reqData = {
+                student_id: currentUser.id,
+                out_date: outDate,
+                out_time: outTime,
+                in_date: document.getElementById('inDate').value,
+                destination: document.getElementById('destination').value,
+                reason: document.getElementById('reason').value,
+                request_type: document.getElementById('reqType').value,
+                teacher_approval: teacherApp,
+                status: finalStatus
+            };
+
+            const { error } = await supabaseClient.from('out_permissions').insert([reqData]);
+            
+            if (error) alert("Error: " + error.message);
+            else {
+                alert('Request Submitted!');
+                this.reset();
+                renderTable(currentUser.id);
+            }
+            btn.innerText = "Submit Request"; btn.disabled = false;
+        });
+
+        async function renderTable(userId) {
+            const { data: history } = await supabaseClient.from('out_permissions').select('*').eq('student_id', userId).order('request_id', { ascending: false });
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            if(history) {
+                history.forEach(r => {
+                    let sClass = r.status.includes('Approved') ? 'approved' : (r.status.includes('Reject') ? 'rejected' : 'pending');
+                    tbody.innerHTML += `<tr>
+                        <td><b>${r.destination}</b></td>
+                        <td>${r.out_date} (${r.out_time})</td>
+                        <td>${r.in_date}</td>
+                        <td>${r.teacher_approval}</td>
+                        <td><span class='badge ${sClass}'>${r.status}</span></td>
+                    </tr>`;
+                });
+            }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
