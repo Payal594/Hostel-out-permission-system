@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Warden Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 260px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar h2 { font-size: 22px; margin-bottom: 30px; text-align: center; }
+        .user-info { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .sidebar a { color: rgba(255,255,255,0.9); text-decoration: none; padding: 12px 15px; margin: 5px 0; border-radius: 8px; transition: all 0.3s; display: block; font-weight: 500; }
+        .sidebar a:hover { background: rgba(255,255,255,0.2); color: white; padding-left: 20px; }
+        .logout-btn { margin-top: auto; background: rgba(0,0,0,0.1); text-align: center; cursor: pointer;}
+        
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        
+        /* --- NEW CSS FOR STAT CARDS --- */
+        .stats-container { display: flex; gap: 20px; margin-bottom: 30px; }
+        .stat-card { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 5px solid #11998e; }
+        .stat-card h3 { color: #555; font-size: 1rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .stat-card .number { font-size: 2.5rem; font-weight: bold; color: #11998e; }
+        
+        .stat-card.pending { border-bottom-color: #ffc107; }
+        .stat-card.pending .number { color: #ffc107; }
+        
+        .stat-card.accepted { border-bottom-color: #28a745; }
+        .stat-card.accepted .number { color: #28a745; }
+        /* ------------------------------- */
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        th { background: #11998e; color: white; padding: 15px; text-align: left; font-size: 14px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="user-info">
+            <h2>Warden Panel</h2>
+            <p>{{FULLNAME}}</p>
+        </div>
+        <a href="/warden_dashboard">Dashboard</a>
+        <a href="/profile">Profile</a>
+        <a href="/promote.html" style="color: #ffd7d7; font-weight: bold;">Promote Students ⚠️</a>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="main">
+        
+        <!-- NEW STATS CARDS SECTION -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Today</h3>
+                <div class="number">{{TODAY_TOTAL}}</div>
+            </div>
+            <div class="stat-card pending">
+                <h3>Pending</h3>
+                <div class="number">{{TODAY_PENDING}}</div>
+            </div>
+            <div class="stat-card accepted">
+                <h3>Accepted</h3>
+                <div class="number">{{TODAY_ACCEPTED}}</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 20px; color: #333;">Student Out-Pass Requests</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Info</th>
+                    <th>Destination</th>
+                    <th>Out Date</th>
+                    <th>Return Date</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{REQUESTS_TABLE}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

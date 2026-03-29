@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Warden Registration</title>
+    <style>
+        body { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        input[type="text"], input[type="tel"], input[type="email"], input[type="password"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .radio-group { margin: 15px 0; font-weight: bold; color: #555; }
+        .radio-group input { margin-left: 10px; margin-right: 5px; }
+        button { width: 100%; padding: 14px; background: #11998e; color: white; border: none; cursor: pointer; border-radius: 8px; font-size: 1.1rem; margin-top: 15px; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: #0e7e75; }
+        .back-link { text-align: center; display: block; margin-top: 20px; color: #11998e; text-decoration: none; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Warden Registration</h2>
+        
+        <form action="/register-warden" method="POST">
+            <input type="text" name="fullname" placeholder="Enter Full Name" required>
+            <input type="tel" name="phone" placeholder="Enter Phone Number" required pattern="[0-9]{10}" maxlength="10">
+            <input type="email" name="email" placeholder="Enter Email Address" required>
+            
+            <div class="radio-group">
+                <label>Assigned Hostel: </label>
+                <input type="radio" name="gender" value="Male" required> Boys Hostel
+                <input type="radio" name="gender" value="Female" required> Girls Hostel
+            </div>
+            
+            <input type="password" id="password" name="password" placeholder="Password (Min 8 chars)" required minlength="8">
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required oninput="checkPasswordMatch()">
+            
+            <button type="submit">Register Warden</button>
+            <a href="login.html?role=warden" class="back-link">← Back to Login</a>
+        </form>
+    </div>
+
+    <script>
+        // Simple UI validation to ensure passwords match
+        function checkPasswordMatch() {
+            const pass = document.getElementById('password');
+            const confirmPass = document.getElementById('confirm_password');
+            if (pass.value !== confirmPass.value && confirmPass.value !== "") {
+                confirmPass.setCustomValidity("Passwords do not match.");
+            } else {
+                confirmPass.setCustomValidity("");
+            }
+        }
+    </script>
+</body>
+</html>
