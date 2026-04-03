@@ -461,22 +461,28 @@ app.get('/warden_dashboard', async (req, res) => {
                 if (req.status === 'Rejected') statusColor = '#dc3545';
 
                 let actionButtons = '';
-                if (req.status.includes('Pending')) {
-                    actionButtons = `
-                        <form action="/update-request-status" method="POST" style="margin-bottom: 5px;">
-                            <input type="hidden" name="request_id" value="${req.request_id}">
-                            <input type="hidden" name="status" value="Approved">
-                            <button type="submit" style="background:#28a745; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; width:100%;">Approve</button>
-                        </form>
-                        <form action="/update-request-status" method="POST">
-                            <input type="hidden" name="request_id" value="${req.request_id}">
-                            <input type="hidden" name="status" value="Rejected">
-                            <button type="submit" style="background:#dc3545; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; width:100%;">Reject</button>
-                        </form>
-                    `;
-                } else {
-                    actionButtons = `<span style="color:#888; font-style:italic;">Action Taken</span>`;
-                }
+
+if (req.status === 'Pending Warden') {
+    // ONLY show buttons if it is the Warden's turn to approve
+    actionButtons = `
+        <form action="/update-request-status" method="POST" style="margin-bottom: 5px;">
+            <input type="hidden" name="request_id" value="${req.request_id}">
+            <input type="hidden" name="status" value="Approved">
+            <button type="submit" style="background:#28a745; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; width:100%;">Approve</button>
+        </form>
+        <form action="/update-request-status" method="POST">
+            <input type="hidden" name="request_id" value="${req.request_id}">
+            <input type="hidden" name="status" value="Rejected">
+            <button type="submit" style="background:#dc3545; border:none; color:white; padding:6px 12px; border-radius:4px; cursor:pointer; width:100%;">Reject</button>
+        </form>
+    `;
+} else if (req.status === 'Pending Teacher') {
+    // Show a nice badge letting the Warden know the Teacher has it
+    actionButtons = `<span style="color:#ff9966; font-weight:bold; font-size: 0.9rem;">⏳ Waiting for Teacher</span>`;
+} else {
+    // It's already Approved, Rejected, or Rejected by Teacher
+    actionButtons = `<span style="color:#888; font-style:italic;">Action Taken</span>`;
+}
                 
                 requestsHtml += `<tr>
                     <td><b>${req.student_name}</b><br><small>Room: ${req.room_number}</small></td>
