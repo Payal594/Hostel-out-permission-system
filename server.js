@@ -517,20 +517,52 @@ app.post('/submit-request', async (req, res) => {
 
     try {
         const studentId = req.session.userId;
-        
-        // 2. Grab the exact data fields from the HTML form
         const { request_type, destination, out_date, out_time, in_date, reason } = req.body;
 
-        // 3. Insert the new request into the TiDB database
+        // --- THE NEW LOGIC ENGINE ---
+        
+        // Combine date and time to create a JavaScript Date object
+        const requestDateTime = new Date(`${out_date}T${out_time}`);
+        
+        // Get the Day of the Week (0 = Sunday, 1 = Monday ... 6 = Saturday)
+        const dayOfWeek = requestDateTime.getDay();
+        
+        // Get the Hour of the Day (0 to 23 format)
+        const requestHour = parseInt(out_time.split(':')[0]); 
+
+        // Define your public holidays (Format: YYYY-MM-DD)
+        const publicHolidays = ['2026-08-15', '2026-10-02', '2026-01-26']; 
+
+        // Assume the teacher NEEDS to approve it, unless one of our rules is triggered
+        let teacherApprovalNeeded = true;
+
+        if (dayOfWeek === 0) { 
+            // Rule 1: It is Sunday
+            teacherApprovalNeeded = false;
+        } else if (requestHour < 9 || requestHour >= 16) { 
+            // Rule 2: It is outside working hours (Before 9 AM or 4 PM and later)
+            teacherApprovalNeeded = false;
+        } else if (publicHolidays.includes(out_date)) {
+            // Rule 3: It is a public holiday
+            teacherApprovalNeeded = false;
+        }
+
+        // Assign the correct text statuses based on our logic
+        let teacherStatus = teacherApprovalNeeded ? 'Pending' : 'Not Required';
+        let mainStatus = teacherApprovalNeeded ? 'Pending Teacher' : 'Pending Warden';
+
+        // --- END OF LOGIC ENGINE ---
+
+        // Insert the new request AND our new calculated statuses into the TiDB database
         const query = `
             INSERT INTO out_permissions 
-            (student_id, destination, out_date, out_time, in_date, reason, request_type) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (student_id, destination, out_date, out_time, in_date, reason, request_type, teacher_approval, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
-        await db.execute(query, [studentId, destination, out_date, out_time, in_date, reason, request_type]);
+        await db.execute(query, [studentId, destination, out_date, out_time, in_date, reason, request_type, teacherStatus, mainStatus]);
 
-        // 4. Send the student right back to their dashboard so they can see it in their history!
+        // Send the student right back to their dashboard
         res.redirect('/student_dashboard');
 
     } catch (error) {
