@@ -356,22 +356,39 @@ app.get('/student_dashboard', async (req, res) => {
         } else {
             
             for (let i = 0; i < historyRows.length; i++) {
-                let req = historyRows[i];
-                
-                let outDate = new Date(req.out_date).toLocaleDateString();
-                let inDate = new Date(req.in_date).toLocaleDateString();
-                let statusColor = '#ffc107'; // Yellow/Orange for Pending
-                if (req.status === 'Approved') statusColor = '#28a745'; // Green
-                if (req.status === 'Rejected') statusColor = '#dc3545'; // Red
+    let req = historyRows[i];
+    
+    let outDate = new Date(req.out_date).toLocaleDateString();
+    let inDate = new Date(req.in_date).toLocaleDateString();
+    
+    // Status colors
+    let statusColor = '#ffc107'; // Yellow/Orange for Pending
+    if (req.status === 'Approved') statusColor = '#28a745'; // Green
+    if (req.status.includes('Rejected') || req.status.includes('Cancelled')) statusColor = '#dc3545'; // Red
 
-                historyHtml += `<tr>
-                    <td><b>${req.destination}</b></td>
-                    <td>${outDate} (${req.out_time})</td>
-                    <td>${inDate}</td>
-                    <td>${req.teacher_approval}</td>
-                    <td style="color: ${statusColor}; font-weight: bold;">${req.status}</td>
-                </tr>`;
-            }
+    // --- NEW CANCEL BUTTON LOGIC ---
+    let actionBtn = '';
+    // Only show the cancel button if the status has the word 'Pending' in it
+    if (req.status.includes('Pending')) {
+        actionBtn = `
+            <form action="/cancel-request" method="POST" style="margin:0;">
+                <input type="hidden" name="request_id" value="${req.request_id}">
+                <button type="submit" style="background:#dc3545; color:white; padding:6px 12px; border:none; border-radius:4px; cursor:pointer; float:none; font-size: 0.85rem;">Cancel</button>
+            </form>
+        `;
+    } else {
+        // If it's already approved, rejected, or cancelled, just show a dash
+        actionBtn = `<span style="color:#888;">-</span>`;
+    }
+
+    historyHtml += `<tr>
+        <td><b>${req.destination}</b></td>
+        <td>${outDate} (${req.out_time})</td>
+        <td>${inDate}</td>
+        <td>${req.teacher_approval}</td>
+        <td style="color: ${statusColor}; font-weight: bold;">${req.status}</td>
+        <td>${actionBtn}</td> </tr>`;
+}
         }
 
      
