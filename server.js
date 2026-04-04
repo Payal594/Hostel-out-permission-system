@@ -593,3 +593,35 @@ app.post('/submit-request', async (req, res) => {
         res.status(500).send("Error submitting request. Check your terminal.");
     }
 });
+
+// ==========================================
+// --- ROUTE: CANCEL OUT-PASS REQUEST ---
+// ==========================================
+app.post('/cancel-request', async (req, res) => {
+    // 1. Security Check: Must be a logged-in student
+    if (!req.session.isLoggedIn || req.session.userRole !== 'student') {
+        return res.redirect('/login.html?role=student');
+    }
+
+    try {
+        const studentId = req.session.userId;
+        const { request_id } = req.body;
+
+        // 2. The Database Update (Soft Delete)
+        // We only allow cancellation IF it belongs to the logged-in student AND is still pending.
+        const query = `
+            UPDATE out_permissions 
+            SET status = 'Cancelled by Student', teacher_approval = 'Not Required'
+            WHERE request_id = ? AND student_id = ? AND status LIKE '%Pending%'
+        `;
+        
+        await db.execute(query, [request_id, studentId]);
+
+        // 3. Refresh the page
+        res.redirect('/student_dashboard');
+
+    } catch (error) {
+        console.error("Cancel Request Error:", error);
+        res.status(500).send("Error cancelling request.");
+    }
+});
